@@ -1,6 +1,6 @@
 # Java Dependencies Analyzer for LLM
 
-A Python script that analyzes Java source files to extract and collect their dependencies, designed specifically for preparing context for Large Language Models (LLMs).
+This tool is designed to analyzes Java source files and dump the contents of the selected file and its dependencies into a single file, making it easier to use in Retrieval-Augmented Generation (RAG) systems or as part of prompts for Large Language Models (LLMs). By consolidating your codebase into one file, you can more easily pass context to an LLM or integrate it into a RAG pipeline.
 
 ## Features
 
@@ -20,9 +20,20 @@ A Python script that analyzes Java source files to extract and collect their dep
 
 ## Installation
 
-1. Install Python dependencies:
+1. Install Python dependencies using the requirements.txt file:
+
 ```bash
-pip install jpype1
+pip install -r requirements.txt
+```
+
+This will install all required dependencies including:
+- JPype1 for Java integration
+- Graphviz for dependency visualization
+
+Note that if you are on MacOS, you need to install Graphviz as well.
+
+```bash
+brew install graphviz
 ```
 
 2. Download JavaParser JAR file and place it in the same directory as the script:
@@ -59,7 +70,7 @@ Generate with dependency graph:
 ```bash
 python tollm.py --file src/main/java/com/example/MyClass.java --root /path/to/project --base_package com.example --graph
 ```
-```
+
 
 ## Output
 
@@ -98,4 +109,4 @@ The script maintains a cache file `.java2llm` in the root directory to speed up 
 
 ## License
 
-
+Apache License 2.0
