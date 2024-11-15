@@ -1,0 +1,9 @@
+.direnv
+.env
+.envrc
+*.jar
+*.png
+*.txt
+*.md
+*.json
+.DS_Store
