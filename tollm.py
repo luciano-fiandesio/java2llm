@@ -109,12 +109,15 @@ def find_linked_classes(target_file, depth, root_dir, base_package):
 
 def extract_linked_classes(compilation_unit, base_package):
     linked_classes = set()
+    
+    # Get package name for resolving same-package references
+    package_name = str(compilation_unit.getPackageDeclaration().get().getName()) if compilation_unit.getPackageDeclaration().isPresent() else ""
+    
+    # Process imports
     for import_decl in compilation_unit.getImports():
         # Convert Java String to Python string before checking
         if import_decl.isStatic():
             # For static imports, get the class name by removing the last part
-            # e.g., "org.hisp.dhis.analytics.util.DisplayNameUtils.getDisplayName" 
-            # becomes "org.hisp.dhis.analytics.util.DisplayNameUtils"
             full_name = str(import_decl.getName().asString())
             class_name_str = '.'.join(full_name.split('.')[:-1])
         else:
@@ -122,6 +125,33 @@ def extract_linked_classes(compilation_unit, base_package):
             
         if not class_name_str.startswith('java.') and class_name_str.startswith(base_package):
             linked_classes.add(class_name_str)
+    
+    # Process class declarations to find extends and implements
+    for type_decl in compilation_unit.getTypes():
+        # Handle extended class
+        if type_decl.getExtendedTypes().isNonEmpty():
+            for extended_type in type_decl.getExtendedTypes():
+                class_name = str(extended_type.asString())
+                # If it's a simple class name (no package), assume it's in the same package
+                if '.' not in class_name:
+                    full_class_name = f"{package_name}.{class_name}"
+                    if full_class_name.startswith(base_package):
+                        linked_classes.add(full_class_name)
+                elif class_name.startswith(base_package):
+                    linked_classes.add(class_name)
+        
+        # Handle implemented interfaces
+        if type_decl.getImplementedTypes().isNonEmpty():
+            for implemented_type in type_decl.getImplementedTypes():
+                class_name = str(implemented_type.asString())
+                # If it's a simple class name (no package), assume it's in the same package
+                if '.' not in class_name:
+                    full_class_name = f"{package_name}.{class_name}"
+                    if full_class_name.startswith(base_package):
+                        linked_classes.add(full_class_name)
+                elif class_name.startswith(base_package):
+                    linked_classes.add(class_name)
+    
     return linked_classes
 
 def load_cache(root_dir):
